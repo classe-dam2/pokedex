@@ -1,0 +1,19 @@
+{
+  "name": "pokedex",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+		"dev": "bun src/index.html"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@biomejs/biome": "^2.5.15"
+
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+  }
+}
