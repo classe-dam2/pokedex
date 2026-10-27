@@ -4,10 +4,8 @@
   "workspaces": {
     "": {
       "name": "pokedex",
-      "dependencies": {
-        "@biomejs/biome": "^2.5.15",
-      },
       "devDependencies": {
+        "@biomejs/biome": "^2.5.15",
         "@types/bun": "latest",
       },
       "peerDependencies": {

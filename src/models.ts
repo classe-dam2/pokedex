@@ -5,37 +5,38 @@
 //    valida en execució que l'API realment retorni aquesta estructura.
 // ==========================================================
 
+import { getIdFromUrl } from "./utils";
+
 export interface IPokeApiListItem {
-    name: string;
-    url: string;
+	name: string;
+	url: string;
 }
 
 export interface IPokeApiListResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: IPokeApiListItem[];
+	count: number;
+	next: string | null;
+	previous: string | null;
+	results: IPokeApiListItem[];
 }
 
 export interface IPokeApiTypeSlot {
-    slot: number;
-    pokemon: IPokeApiListItem;
+	slot: number;
+	pokemon: IPokeApiListItem;
 }
 
 export interface IPokeApiTypeResponse {
-    pokemon: IPokeApiTypeSlot[];
+	pokemon: IPokeApiTypeSlot[];
 }
 
 export interface IPokeApiDetail {
-    id: number;
-    name: string;
-    weight: number;
-    sprites: { front_default: string | null };
-    types: Array<{ type: { name: string } }>;
-    stats: Array<{ base_stat: number; stat: { name: string } }>;
-    cries?: { latest?: string; legacy?: string };
+	id: number;
+	name: string;
+	weight: number;
+	sprites: { front_default: string | null };
+	types: Array<{ type: { name: string } }>;
+	stats: Array<{ base_stat: number; stat: { name: string } }>;
+	cries?: { latest?: string; legacy?: string };
 }
-
 
 // ==========================================================
 // 2. ALIAS DE TIPUS
@@ -48,7 +49,6 @@ export type EstatTipus = "loading" | "error";
 /** Estadística d'un Pokémon: tupla etiquetada [nom, valor base]. Ex: ["hp", 35] */
 export type Stat = [name: string, value: number];
 
-
 // ==========================================================
 // 3. PokemonType (JA IMPLEMENTADA, usa-la com a MODEL)
 //    Fixa't: `readonly` per a dades que no canvien i un getter
@@ -59,22 +59,21 @@ export type Stat = [name: string, value: number];
  * Representa un tipus de Pokémon (Foc, Aigua, etc.)
  */
 export class PokemonType {
+	public readonly id: string;
+	public readonly name: PokemonTypeName;
+	public readonly icon: string;
+	public readonly color: string;
 
-    public readonly id: string;
-    public readonly name: string;
-    public readonly icon: string;
-    public readonly color: string;
-
-    // 2. Rebre els valors i fer l'assignació manual
-    constructor(id: string, name: string, icon: string, color: string) {
-        this.id = id;
-        this.name = name;
-        this.icon = icon;
-        this.color = color;
-    }
-    get label(): string {
-        return `${this.icon} ${this.name}`;
-    }
+	// 2. Rebre els valors i fer l'assignació manual
+	constructor(id: string, name: string, icon: string, color: string) {
+		this.id = id;
+		this.name = name as PokemonTypeName;
+		this.icon = icon;
+		this.color = color;
+	}
+	get label(): string {
+		return `${this.icon} ${this.name}`;
+	}
 }
 
 // ==========================================================
@@ -88,29 +87,44 @@ export class PokemonType {
 // Per això el diccionari té 17 tipus i no 15.
 // ==========================================================
 
-export type PokemonTypeName = | "normal" | "fire" | "water" | "grass" | "electric" | "ice" | "fighting"
-    | "poison" | "ground" | "flying" | "psychic" | "bug" | "rock" | "ghost" | "dragon" | "steel" | "fairy";
+export type PokemonTypeName =
+	| "normal"
+	| "fire"
+	| "water"
+	| "grass"
+	| "electric"
+	| "ice"
+	| "fighting"
+	| "poison"
+	| "ground"
+	| "flying"
+	| "psychic"
+	| "bug"
+	| "rock"
+	| "ghost"
+	| "dragon"
+	| "steel"
+	| "fairy";
 
 export const POKEMON_TYPES: Record<PokemonTypeName, PokemonType> = {
-    normal: new PokemonType("normal", "Normal", "⚪", "#a8a878"),
-    fire: new PokemonType("fire", "Foc", "🔥", "#c84010"),
-    water: new PokemonType("water", "Aigua", "💧", "#2060c0"),
-    grass: new PokemonType("grass", "Planta", "🌿", "#208020"),
-    electric: new PokemonType("electric", "Elèctric", "⚡", "#a08000"),
-    ice: new PokemonType("ice", "Gel", "❄️", "#68c2d0"),
-    fighting: new PokemonType("fighting", "Lluita", "🥊", "#c03028"),
-    poison: new PokemonType("poison", "Verí", "☠️", "#703870"),
-    ground: new PokemonType("ground", "Terra", "⏳", "#e0c068"),
-    flying: new PokemonType("flying", "Volador", "🦅", "#a890f0"),
-    psychic: new PokemonType("psychic", "Psíquic", "🔮", "#f85888"),
-    bug: new PokemonType("bug", "Insecte", "🐛", "#a8b820"),
-    rock: new PokemonType("rock", "Roca", "🪨", "#b8a038"),
-    ghost: new PokemonType("ghost", "Fantasma", "👻", "#705898"),
-    dragon: new PokemonType("dragon", "Drac", "🐉", "#7038f8"),
-    steel: new PokemonType("steel", "Acer", "⚙️", "#b8b8d0"),
-    fairy: new PokemonType("fairy", "Fada", "🧚", "#ee99ac")
+	normal: new PokemonType("normal", "Normal", "⚪", "#a8a878"),
+	fire: new PokemonType("fire", "Foc", "🔥", "#c84010"),
+	water: new PokemonType("water", "Aigua", "💧", "#2060c0"),
+	grass: new PokemonType("grass", "Planta", "🌿", "#208020"),
+	electric: new PokemonType("electric", "Elèctric", "⚡", "#a08000"),
+	ice: new PokemonType("ice", "Gel", "❄️", "#68c2d0"),
+	fighting: new PokemonType("fighting", "Lluita", "🥊", "#c03028"),
+	poison: new PokemonType("poison", "Verí", "☠️", "#703870"),
+	ground: new PokemonType("ground", "Terra", "⏳", "#e0c068"),
+	flying: new PokemonType("flying", "Volador", "🦅", "#a890f0"),
+	psychic: new PokemonType("psychic", "Psíquic", "🔮", "#f85888"),
+	bug: new PokemonType("bug", "Insecte", "🐛", "#a8b820"),
+	rock: new PokemonType("rock", "Roca", "🪨", "#b8a038"),
+	ghost: new PokemonType("ghost", "Fantasma", "👻", "#705898"),
+	dragon: new PokemonType("dragon", "Drac", "🐉", "#7038f8"),
+	steel: new PokemonType("steel", "Acer", "⚙️", "#b8b8d0"),
+	fairy: new PokemonType("fairy", "Fada", "🧚", "#ee99ac"),
 };
-
 
 // ==========================================================
 // 5. CLASSES QUE HAS D'IMPLEMENTAR TU
@@ -139,8 +153,33 @@ export const POKEMON_TYPES: Record<PokemonTypeName, PokemonType> = {
  *   get formattedId: retorna l'atribut id en format "#025" (3 xifres, amb zeros a l'esquerra. Pista: padStart).
  */
 
+export class BasePokemon {
+	private readonly _id: number;
+	private readonly _name: string;
+	private readonly _url: string;
 
+	constructor(item: IPokeApiListItem) {
+		this._name = item.name;
+		this._url = item.url;
+		this._id = getIdFromUrl(item.url);
+	}
 
+	get id(): number {
+		return this._id;
+	}
+
+	get name(): string {
+		return this._name;
+	}
+
+	get url(): string {
+		return this._url;
+	}
+
+	get formattedId(): string {
+		return `#${this._id.toString().padStart(3, "0")}`;
+	}
+}
 
 /**
  * EXERCICI 3: class DetailedPokemon
@@ -179,5 +218,47 @@ export const POKEMON_TYPES: Record<PokemonTypeName, PokemonType> = {
  *   get stats: retorna un array de type Stat
  */
 
+export class DetailedPokemon extends BasePokemon {
+	private readonly _weightKg: number;
+	private readonly _imageUrl: string;
+	private readonly _types: PokemonType[];
+	private readonly _stats: Stat[];
+	private readonly _cryUrl?: string;
 
+	constructor(data: IPokeApiDetail, url: string) {
+		super({
+			name: data.name,
+			url,
+		});
 
+		console.log(data.cries);
+
+		this._weightKg = data.weight;
+		this._cryUrl = data.cries?.latest ?? data.cries?.legacy;
+		this._imageUrl = data.sprites.front_default ?? "";
+		this._stats = data.stats.map((s): Stat => [s.stat.name, s.base_stat]);
+		this._types = data.types
+			.map((t) => POKEMON_TYPES[t.type.name as PokemonTypeName])
+			.filter((type): type is PokemonType => type !== undefined);
+	}
+
+	get weightKg() {
+		return this._weightKg;
+	}
+
+	get imageUrl() {
+		return this._imageUrl;
+	}
+
+	get types() {
+		return this._types;
+	}
+
+	get stats() {
+		return this._stats;
+	}
+
+	get cryUrl() {
+		return this._cryUrl;
+	}
+}
