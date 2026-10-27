@@ -231,9 +231,7 @@ export class DetailedPokemon extends BasePokemon {
 			url,
 		});
 
-		console.log(data.cries);
-
-		this._weightKg = data.weight;
+		this._weightKg = data.weight / 10;
 		this._cryUrl = data.cries?.latest ?? data.cries?.legacy;
 		this._imageUrl = data.sprites.front_default ?? "";
 		this._stats = data.stats.map((s): Stat => [s.stat.name, s.base_stat]);

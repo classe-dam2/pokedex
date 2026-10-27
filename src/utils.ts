@@ -82,7 +82,6 @@ export function netejarDetallCard(): void {
  * Reprodueix el crit del Pokémon.
  */
 export function reproduirCrit(soundUrl: string): void {
-	console.log(soundUrl);
 	const audio = new Audio(soundUrl);
 	audio.play().catch(() => {
 		mostrarEstat("No s'ha pogut reproduir el crit.", "error");
@@ -146,7 +145,6 @@ export function renderitzarLlistaNoms(llista: Models.BasePokemon[]) {
 
 export function renderitzarDetallCard(pokemon: Models.DetailedPokemon) {
 	const card = getElement<HTMLDivElement>("#pokemon-detail");
-	console.log(new URL(pokemon.cryUrl ?? ""));
 
 	card.innerHTML = `
  		<h3>${pokemon.formattedId} ${pokemon.name}</h3>
@@ -164,14 +162,13 @@ export function renderitzarDetallCard(pokemon: Models.DetailedPokemon) {
         </div>
 	`;
 
-	getElement<HTMLButtonElement>("#btn-play-cry").addEventListener(
-		"click",
-		() => {
-			if (!pokemon.cryUrl) return;
-
-			reproduirCrit(pokemon.cryUrl);
-		},
-	);
+	const cryUrl = pokemon.cryUrl;
+	if (cryUrl) {
+		getElement<HTMLButtonElement>("#btn-play-cry").addEventListener(
+			"click",
+			() => reproduirCrit(cryUrl),
+		);
+	}
 
 	card.className = "detail-card";
 }

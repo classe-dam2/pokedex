@@ -98,31 +98,25 @@ async function carregarDetallPokemon(id: number) {
 
 	const url = `https://pokeapi.co/api/v2/pokemon/${id}`;
 
-	if (!cached) {
-		const pokemon: IPokeApiDetail | null = await fetch(url)
-			.then(async (res) => await res.json())
-			.catch(() => null);
-		console.log(pokemon);
-		if (!pokemon) {
-			mostrarEstat("error al obtenir el pokemon", "error");
-			return;
-		}
+	try {
+		const res = await fetch(url);
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+		const pokemon: IPokeApiDetail = await res.json();
 		const result = new DetailedPokemon(pokemon, url);
 		cachePokemons.set(id, result);
 
 		renderitzarDetallCard(result);
 		amagarEstat();
-		return;
+	} catch {
+		mostrarEstat("error al obtenir el pokemon", "error");
 	}
 }
 
 container.addEventListener("click", (e) => {
-	console.log(e.target);
-
-	const id = Number(
-		(e.target as HTMLLIElement).attributes.getNamedItem("data-id")?.value,
-	);
+	const li = (e.target as HTMLElement).closest("li");
+	const id = Number(li?.dataset.id);
+	if (!id) return;
 
 	carregarDetallPokemon(id);
 });
@@ -144,19 +138,22 @@ window.onload = () => {
 export async function carregarPokemonPerTipus(tipus: PokemonTypeName) {
 	mostrarEstat("Carregant llista de Pokémon...", "loading");
 
-	const results = await fetch(`https://pokeapi.co/api/v2/type/${tipus}`)
-		.then(async (res) => await res.json())
-		.then((res: IPokeApiTypeResponse) => {
-			return res.pokemon;
-		})
-		.catch(() => []);
+	let results: IPokeApiTypeResponse["pokemon"];
+	try {
+		const res = await fetch(`https://pokeapi.co/api/v2/type/${tipus}`);
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		results = ((await res.json()) as IPokeApiTypeResponse).pokemon;
+	} catch {
+		mostrarEstat("Error al carregar la llista de Pokémon.", "error");
+		return;
+	}
 
 	mapaPokemon.clear();
 
 	for (const pokemon of results) {
 		const pok = new BasePokemon(pokemon.pokemon);
 		if (pok.id > 151) {
-			break;
+			continue;
 		}
 
 		mapaPokemon.set(pok.id, pok);
