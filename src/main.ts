@@ -8,6 +8,7 @@ import {
 	DetailedPokemon,
 	type IPokeApiDetail,
 	type IPokeApiTypeResponse,
+	type IPokeApiTypeSlot,
 	type PokemonTypeName,
 } from "./models";
 import {
@@ -22,7 +23,8 @@ import {
 	renderitzarLlistaNoms,
 } from "./utils";
 
-const mapaPokemon = new Map<number, BasePokemon>();
+export const mapaPokemon = new Map<number, BasePokemon>();
+const typePokemon = new Map<PokemonTypeName, IPokeApiTypeResponse["pokemon"]>();
 const cachePokemons = new Map<number, DetailedPokemon>();
 
 document.querySelector("#btn-show-all")?.addEventListener("click", async () => {
@@ -127,7 +129,33 @@ container.addEventListener("click", (e) => {
 // TODO: Implementa la lògica de l'exercici 4 seguint els requisits
 
 window.onload = () => {
-	generarBotonsTipus();
+	localStorage.removeItem("active");
+	const btns = generarBotonsTipus();
+
+	for (const [btn, id] of btns) {
+		btn.addEventListener("click", () => {
+			const prev = localStorage.getItem("active");
+			if (prev !== null) {
+				if (prev === id) {
+					mapaPokemon.clear();
+					renderitzarLlistaNoms([]);
+					netejarCercador();
+					netejarDetallCard();
+					localStorage.removeItem("active");
+					btn.classList.remove("active");
+
+					return;
+				}
+
+				getElement<HTMLButtonElement>(`#${prev}`)?.classList.remove("active");
+			}
+
+			localStorage.setItem("active", id);
+			btn.classList.add("active");
+
+			void carregarPokemonPerTipus(String(id) as PokemonTypeName);
+		});
+	}
 };
 
 // ==========================================================
@@ -139,13 +167,19 @@ export async function carregarPokemonPerTipus(tipus: PokemonTypeName) {
 	mostrarEstat("Carregant llista de Pokémon...", "loading");
 
 	let results: IPokeApiTypeResponse["pokemon"];
-	try {
-		const res = await fetch(`https://pokeapi.co/api/v2/type/${tipus}`);
-		if (!res.ok) throw new Error(`HTTP ${res.status}`);
-		results = ((await res.json()) as IPokeApiTypeResponse).pokemon;
-	} catch {
-		mostrarEstat("Error al carregar la llista de Pokémon.", "error");
-		return;
+
+	if (typePokemon.get(tipus)?.length) {
+		results = typePokemon.get(tipus) ?? [];
+	} else {
+		try {
+			const res = await fetch(`https://pokeapi.co/api/v2/type/${tipus}`);
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			results = ((await res.json()) as IPokeApiTypeResponse).pokemon;
+			typePokemon.set(tipus, results);
+		} catch {
+			mostrarEstat("Error al carregar la llista de Pokémon.", "error");
+			return;
+		}
 	}
 
 	mapaPokemon.clear();

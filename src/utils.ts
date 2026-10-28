@@ -1,4 +1,3 @@
-import { carregarPokemonPerTipus } from "./main.js";
 import * as Models from "./models.js";
 
 export function getElement<T>(id: string) {
@@ -192,19 +191,24 @@ export function renderitzarDetallCard(pokemon: Models.DetailedPokemon) {
 
 // TODO: Implementa la lògica de l'exercici 4 seguint els requisits
 
-export function generarBotonsTipus(): void {
+type ButtonTypes = Array<[HTMLButtonElement, string]>;
+
+export function generarBotonsTipus(): ButtonTypes {
 	const typesContainer = getElement<HTMLDivElement>("#type-filter-container");
 	typesContainer.textContent = "";
+
+	const btns: ButtonTypes = [];
+
 	Object.values(Models.POKEMON_TYPES).forEach((el) => {
 		const btn = document.createElement("button");
 		btn.className = "btn-type";
-		btn.dataset.type = el.id;
+		btn.id = el.id;
 		btn.style.backgroundColor = el.color;
 		btn.textContent = `${el.icon} ${el.name}`;
 		typesContainer.appendChild(btn);
 
-		btn.addEventListener("click", () => {
-			void carregarPokemonPerTipus(String(el.id) as Models.PokemonTypeName);
-		});
+		btns.push([btn, el.id]);
 	});
+
+	return btns;
 }
